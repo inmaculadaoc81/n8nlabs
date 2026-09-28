@@ -32,7 +32,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
@@ -53,7 +53,7 @@ export default function RootLayout({
             areaServed: "ES",
           }}
         />
-        <Header showBlog={getAllPosts().length > 0} />
+        <Header showBlog={(await getAllPosts()).length > 0} />
         {children}
       </body>
     </html>

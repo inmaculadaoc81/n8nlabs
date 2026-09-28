@@ -11,13 +11,15 @@ export const alt = "Portada del artículo";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-export function generateStaticParams() {
-  return getAllPosts().map((p) => ({ slug: p.slug }));
+export const revalidate = 3600;
+
+export async function generateStaticParams() {
+  return (await getAllPosts()).map((p) => ({ slug: p.slug }));
 }
 
 export default async function Image({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const post = getPost(slug);
+  const post = await getPost(slug);
   if (!post) {
     return new ImageResponse(
       <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", background: "#111", color: "#fff", fontSize: 64 }}>{SITE_NAME}</div>,
@@ -27,7 +29,10 @@ export default async function Image({ params }: { params: Promise<{ slug: string
   let foto: string | null = null;
   if (post.image) {
     try {
-      const datos = fs.readFileSync(path.join(process.cwd(), "public", post.image));
+      // La foto puede estar en la web (public/) o servirla la API de Kelatos
+      const datos = post.image.startsWith("https://")
+        ? Buffer.from(await (await fetch(post.image, { signal: AbortSignal.timeout(8000) })).arrayBuffer())
+        : fs.readFileSync(path.join(process.cwd(), "public", post.image));
       const tipo = /\.png$/i.test(post.image) ? "image/png" : /\.webp$/i.test(post.image) ? "image/webp" : "image/jpeg";
       foto = `data:${tipo};base64,${datos.toString("base64")}`;
     } catch {

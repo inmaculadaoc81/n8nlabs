@@ -2,8 +2,11 @@ import type { MetadataRoute } from "next";
 import { getAllPosts } from "@/lib/blog";
 import { absoluteUrl } from "@/lib/site";
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const posts = getAllPosts();
+// Se regenera solo cada 5 minutos para incluir los artículos nuevos de la API
+export const revalidate = 300;
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const posts = await getAllPosts();
   const fijas: MetadataRoute.Sitemap = [
     { url: absoluteUrl("/"), changeFrequency: "monthly", priority: 1 },
     { url: absoluteUrl("/politica-de-privacidad"), changeFrequency: "yearly", priority: 0.2 },

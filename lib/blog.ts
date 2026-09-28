@@ -53,6 +53,16 @@ const FECHA_RE = /^\d{4}-\d{2}-\d{2}$/;
 // Solo rutas locales de imágenes de la carpeta pública: nada de URLs externas ni rutas raras
 const IMAGEN_RE = /^\/[A-Za-z0-9_-]+(?:\/[A-Za-z0-9_.-]+)*\.(?:jpe?g|png|webp)$/;
 
+// Las fotos de los artículos publicados por el departamento SEO las sirve la API de Kelatos (lectura pública)
+const IMAGEN_API_RE = /^https:\/\/db\.affirmatechnology\.com\/kelatos-api\/publico\/blog\/imagenes\/[a-z0-9-]+\.jpg$/;
+const API_BLOG = process.env.KELATOS_BLOG_API ?? "https://db.affirmatechnology.com/kelatos-api";
+
+function imagenValida(x: unknown): string | undefined {
+  if (typeof x !== "string") return undefined;
+  const v = x.trim();
+  return IMAGEN_API_RE.test(v) || (IMAGEN_RE.test(v) && !v.includes("..")) ? v : undefined;
+}
+
 const URL_SEGURA = /^(https?:\/\/|mailto:|\/(?!\/)|#)/i;
 
 function escapar(t: string): string {
@@ -119,55 +129,81 @@ function leerArchivo(nombre: string): PostInterno | null {
   try {
     const bruto = fs.readFileSync(path.join(CONTENT_DIR, nombre), "utf8");
     const { data, content } = matter(bruto);
-    const slug = String(data.slug ?? nombre.replace(/\.md$/, ""));
-    const fecha = data.date instanceof Date ? data.date.toISOString().slice(0, 10) : String(data.date ?? "");
-    if (!SLUG_RE.test(slug)) throw new Error(`slug no válido: ${slug}`);
-    if (typeof data.title !== "string" || !data.title.trim()) throw new Error("falta title");
-    if (typeof data.description !== "string" || !data.description.trim()) throw new Error("falta description");
-    if (!FECHA_RE.test(fecha) || Number.isNaN(new Date(fecha).getTime())) throw new Error("date debe ser AAAA-MM-DD");
-    if (!content.trim()) throw new Error("el artículo está vacío");
-    const actualizado = data.updated instanceof Date ? data.updated.toISOString().slice(0, 10) : data.updated ? String(data.updated) : undefined;
-    const palabras = content.split(/\s+/).filter(Boolean).length;
-    tocActual = [];
-    idsUsados = new Set<string>();
-    const html = marked.parse(content, { async: false }) as string;
-    const toc = tocActual;
-    return {
-      slug,
-      author: typeof data.author === "string" && data.author.trim() ? data.author.trim().slice(0, 80) : "N8n Labs",
-      category: typeof data.category === "string" && data.category.trim() ? data.category.trim().slice(0, 40) : "Automatización",
-      title: data.title.trim(),
-      description: data.description.trim(),
-      date: fecha,
-      updated: actualizado && FECHA_RE.test(actualizado) ? actualizado : undefined,
-      keyword: typeof data.keyword === "string" ? data.keyword : undefined,
-      tags: Array.isArray(data.tags) ? data.tags.filter((t: unknown): t is string => typeof t === "string") : [],
-      readingMinutes: Math.max(1, Math.round(palabras / 200)),
-      image: typeof data.image === "string" && IMAGEN_RE.test(data.image.trim()) && !data.image.includes("..") ? data.image.trim() : undefined,
-      imageAlt: typeof data.imageAlt === "string" && data.imageAlt.trim() ? data.imageAlt.trim().slice(0, 160) : undefined,
-      imageCredit: typeof data.imageCredit === "string" && data.imageCredit.trim() ? data.imageCredit.trim().slice(0, 120) : undefined,
-      html,
-      toc,
-      draft: data.draft === true,
-      archivo: nombre,
-    };
+    return armarPost(data, content, nombre);
   } catch (e) {
     console.warn(`[blog] Se ignora ${nombre}: ${e instanceof Error ? e.message : e}`);
     return null;
   }
 }
 
-let cache: Post[] | null = null;
-
-/** Artículos publicados (sin borradores ni fechas futuras), del más reciente al más antiguo. */
-export function getAllPosts(): Post[] {
-  // En producción se lee una sola vez por proceso de build; en desarrollo se relee para ver los cambios
-  if (cache && process.env.NODE_ENV === "production") return cache;
-  cache = leerTodos();
-  return cache;
+/** Valida los datos de un artículo (de un archivo o de la API) y lo convierte en un Post listo para pintar. Lanza un error si está mal formado. */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function armarPost(data: Record<string, any>, content: string, nombre: string): PostInterno {
+  const slug = String(data.slug ?? nombre.replace(/\.md$/, ""));
+  const fecha = data.date instanceof Date ? data.date.toISOString().slice(0, 10) : String(data.date ?? "");
+  if (!SLUG_RE.test(slug)) throw new Error(`slug no válido: ${slug}`);
+  if (typeof data.title !== "string" || !data.title.trim()) throw new Error("falta title");
+  if (typeof data.description !== "string" || !data.description.trim()) throw new Error("falta description");
+  if (!FECHA_RE.test(fecha) || Number.isNaN(new Date(fecha).getTime())) throw new Error("date debe ser AAAA-MM-DD");
+  if (!content.trim()) throw new Error("el artículo está vacío");
+  const actualizado = data.updated instanceof Date ? data.updated.toISOString().slice(0, 10) : data.updated ? String(data.updated) : undefined;
+  const palabras = content.split(/\s+/).filter(Boolean).length;
+  tocActual = [];
+  idsUsados = new Set<string>();
+  const html = marked.parse(content, { async: false }) as string;
+  const toc = tocActual;
+  return {
+    slug,
+    author: typeof data.author === "string" && data.author.trim() ? data.author.trim().slice(0, 80) : "N8n Labs",
+    category: typeof data.category === "string" && data.category.trim() ? data.category.trim().slice(0, 40) : "Automatización",
+    title: data.title.trim(),
+    description: data.description.trim(),
+    date: fecha,
+    updated: actualizado && FECHA_RE.test(actualizado) ? actualizado : undefined,
+    keyword: typeof data.keyword === "string" ? data.keyword : undefined,
+    tags: Array.isArray(data.tags) ? data.tags.filter((t: unknown): t is string => typeof t === "string") : [],
+    readingMinutes: Math.max(1, Math.round(palabras / 200)),
+    image: imagenValida(data.image),
+    imageAlt: typeof data.imageAlt === "string" && data.imageAlt.trim() ? data.imageAlt.trim().slice(0, 160) : undefined,
+    imageCredit: typeof data.imageCredit === "string" && data.imageCredit.trim() ? data.imageCredit.trim().slice(0, 120) : undefined,
+    html,
+    toc,
+    draft: data.draft === true,
+    archivo: nombre,
+  };
 }
 
-function leerTodos(): Post[] {
+interface PostApi {
+  slug: string;
+  title: string;
+  description: string;
+  keyword: string | null;
+  category: string;
+  tags: string[];
+  author: string;
+  date: string;
+  updated: string;
+  image: string | null;
+  imageAlt: string | null;
+  imageCredit: string | null;
+  readingMinutes?: number;
+  body?: string;
+}
+
+/** Lee un recurso público de la API de Kelatos. Se cachea un minuto: publicar un artículo se ve en la web en menos de eso, sin recompilar. */
+async function leerApi<T>(ruta: string): Promise<T | null> {
+  try {
+    const r = await fetch(`${API_BLOG}${ruta}`, { next: { revalidate: 60 }, signal: AbortSignal.timeout(8000) });
+    if (!r.ok) return null;
+    return (await r.json()) as T;
+  } catch (e) {
+    console.warn(`[blog] No se pudo leer ${ruta} de la API: ${e instanceof Error ? e.message : e}`);
+    return null;
+  }
+}
+
+/** Artículos de content/blog (ya no se añaden ahí; quedan como respaldo por si la API no responde). */
+function postsDeArchivos(): Post[] {
   if (!fs.existsSync(CONTENT_DIR)) return [];
   const hoy = new Date().toISOString().slice(0, 10);
   const leidos = fs
@@ -189,12 +225,49 @@ function leerTodos(): Post[] {
 
   return [...elegidos.values()]
     .filter((p) => !p.draft && p.date <= hoy)
-    .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : a.slug.localeCompare(b.slug)))
     .map(({ draft: _draft, archivo: _archivo, ...post }) => post);
 }
 
-export function getPost(slug: string): Post | undefined {
-  return getAllPosts().find((p) => p.slug === slug);
+/** Artículos publicados (de la API de Kelatos, más los archivos como respaldo), del más reciente al más antiguo. Sin el texto. */
+export async function getAllPosts(): Promise<PostMeta[]> {
+  const porSlug = new Map<string, PostMeta>();
+  for (const { html: _html, toc: _toc, ...meta } of postsDeArchivos()) porSlug.set(meta.slug, meta);
+  const api = await leerApi<{ posts: PostApi[] }>("/publico/blog");
+  for (const p of api?.posts ?? []) {
+    if (!SLUG_RE.test(p.slug) || !FECHA_RE.test(p.date) || !p.title || !p.description) continue;
+    porSlug.set(p.slug, {
+      slug: p.slug,
+      author: p.author || "N8n Labs",
+      category: p.category || "Automatización",
+      title: p.title,
+      description: p.description,
+      date: p.date,
+      updated: FECHA_RE.test(p.updated) && p.updated !== p.date ? p.updated : undefined,
+      keyword: p.keyword ?? undefined,
+      tags: Array.isArray(p.tags) ? p.tags : [],
+      readingMinutes: Math.max(1, Number(p.readingMinutes) || 1),
+      image: imagenValida(p.image),
+      imageAlt: p.imageAlt ?? undefined,
+      imageCredit: p.imageCredit ?? undefined,
+    });
+  }
+  return [...porSlug.values()].sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : a.slug.localeCompare(b.slug)));
+}
+
+/** Un artículo con su texto ya convertido. La API manda; si no responde o no lo tiene, se busca en los archivos. */
+export async function getPost(slug: string): Promise<Post | undefined> {
+  if (!SLUG_RE.test(slug)) return undefined;
+  const api = await leerApi<{ post: PostApi }>(`/publico/blog/${slug}`);
+  const p = api?.post;
+  if (p?.body) {
+    try {
+      const { draft: _draft, archivo: _archivo, ...post } = armarPost({ ...p, slug: p.slug, keyword: p.keyword ?? undefined }, p.body, `api:${p.slug}`);
+      return post;
+    } catch (e) {
+      console.warn(`[blog] Se ignora el artículo ${slug} de la API: ${e instanceof Error ? e.message : e}`);
+    }
+  }
+  return postsDeArchivos().find((x) => x.slug === slug);
 }
 
 export function formatearFecha(iso: string): string {
