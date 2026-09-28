@@ -7,8 +7,11 @@ import { absoluteUrl, SITE_NAME } from "@/lib/site";
 const TITULO = `Blog de automatización para negocios | ${SITE_NAME}`;
 const DESCRIPCION = "Casos de uso, ideas y novedades para automatizar tu negocio: Excel, CRM, WhatsApp, redes sociales, email marketing e inteligencia artificial.";
 
-export function generateMetadata(): Metadata {
-  const hayArticulos = getAllPosts().length > 0;
+// El listado se regenera solo cada minuto con lo que haya en la API de Kelatos: publicar un artículo no necesita recompilar la web
+export const revalidate = 60;
+
+export async function generateMetadata(): Promise<Metadata> {
+  const hayArticulos = (await getAllPosts()).length > 0;
   return {
     title: TITULO,
     description: DESCRIPCION,
@@ -19,8 +22,8 @@ export function generateMetadata(): Metadata {
   };
 }
 
-export default function BlogIndex() {
-  const posts = getAllPosts();
+export default async function BlogIndex() {
+  const posts = await getAllPosts();
   return (
     <main className="blog-page">
       <div className="blog-index">

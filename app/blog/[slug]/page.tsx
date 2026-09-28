@@ -7,16 +7,18 @@ import JsonLd from "@/components/seo/JsonLd";
 import { formatearFecha, getAllPosts, getPost } from "@/lib/blog";
 import { absoluteUrl, BUSINESS, SITE_NAME } from "@/lib/site";
 
-// Solo se generan los artículos que existen; cualquier otro slug es un 404
-export const dynamicParams = false;
+// Los artículos salen de la API de Kelatos: uno nuevo se genera la primera vez que se pide y se refresca cada minuto (sin recompilar).
+// Un slug que no existe da 404.
+export const revalidate = 60;
+export const dynamicParams = true;
 
-export function generateStaticParams() {
-  return getAllPosts().map((p) => ({ slug: p.slug }));
+export async function generateStaticParams() {
+  return (await getAllPosts()).map((p) => ({ slug: p.slug }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const post = getPost(slug);
+  const post = await getPost(slug);
   if (!post) return {};
   const url = absoluteUrl(`/blog/${post.slug}`);
   return {
@@ -42,7 +44,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function BlogPost({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const post = getPost(slug);
+  const post = await getPost(slug);
   if (!post) notFound();
   const url = absoluteUrl(`/blog/${post.slug}`);
   const actualizado = post.updated && post.updated !== post.date ? post.updated : null;
@@ -60,7 +62,7 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
               datePublished: post.date,
               dateModified: post.updated ?? post.date,
               inLanguage: "es",
-              ...(post.image ? { image: absoluteUrl(post.image) } : {}),
+              ...(post.image ? { image: post.image.startsWith("http") ? post.image : absoluteUrl(post.image) } : {}),
               articleSection: post.category,
               mainEntityOfPage: url,
               author: { "@type": "Organization", name: post.author, url: BUSINESS.url },
