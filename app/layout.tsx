@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Geist, Poppins } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/layout/Header";
@@ -40,6 +41,18 @@ export default async function RootLayout({
   return (
     <html lang="es" className={`${inter.variable} ${poppins.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-white">
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-V9KLHGZ86C"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-V9KLHGZ86C');
+          `}
+        </Script>
         <JsonLd
           data={{
             "@context": "https://schema.org",
