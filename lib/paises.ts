@@ -43,4 +43,8 @@ export function detectarPais(texto: string): { pais: string; resto: string } | n
   return hit ? { pais: hit[2] === "1" ? "US" : hit[0], resto: digitos.slice(hit[2].length) } : null;
 }
 
+/** Países de Europa: allí los importes se muestran en euros; en el resto, en dólares. */
+const EUROPA = new Set(["ES", "PT", "FR", "IT", "DE", "GB", "IE", "NL", "BE", "CH", "AT", "SE", "NO", "DK", "FI", "PL", "RO"]);
+export const simboloMoneda = (iso: string) => (EUROPA.has(iso) ? "€" : "$");
+
 export const prefijoDe = (iso: string) => PAISES.find((p) => p[0] === iso)?.[2] ?? "34";

@@ -17,7 +17,7 @@ export const PREGUNTAS: { campo: Campo; titulo: string; ayuda?: string; opciones
   { campo: "automatizar", titulo: "¿Qué quieres automatizar primero?", opciones: [["whatsapp", "WhatsApp"], ["ventas", "Ventas"], ["facturacion", "Facturación"], ["otro", "Otro"]] },
   { campo: "urgencia", titulo: "¿Para cuándo lo necesitas?", opciones: [["este_mes", "Este mes"], ["1_3_meses", "En 1–3 meses"], ["explorando", "Solo estoy explorando"]] },
   { campo: "inversion", titulo: "¿Qué inversión tienes prevista?", ayuda: "Para proponerte algo que tenga sentido, no para cobrarte de más.", opciones: [["lt500", "Menos de 500 $"], ["500_1500", "500 – 1.500 $"], ["1500_5000", "1.500 – 5.000 $"], ["gt5000", "Más de 5.000 $"]] },
-  { campo: "rol", titulo: "¿Cuál es tu papel en la decisión?", opciones: [["decido_yo", "Decido yo"], ["con_socio", "Decido con un socio"], ["para_otro", "Lo investigo para otro"]] },
+  { campo: "rol", titulo: "¿Cuál es tu papel en la decisión?", opciones: [["decido_yo", "Decido yo"], ["para_otro", "Lo investigo para otro"]] },
 ];
 
 export type Clasificacion = "caliente" | "tibio" | "no_encaja";

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { PREGUNTAS, type Campo, type Clasificacion } from "@/lib/diagnostico";
-import { detectarPais, paisDelNavegador, prefijoDe } from "@/lib/paises";
+import { detectarPais, paisDelNavegador, prefijoDe, simboloMoneda } from "@/lib/paises";
 import SelectorPais from "./SelectorPais";
 
 const AZUL = "#2563eb";
@@ -19,16 +19,17 @@ type Otros = Partial<Record<"rubro" | "automatizar", string>>;
 const RESULTADOS: Record<Clasificacion, { titulo: string; texto: string; accion?: { texto: string; href: string } }> = {
   caliente: {
     titulo: "Tu negocio encaja",
-    texto: "Por lo que cuentas, podemos ayudarte de verdad. Te escribimos por WhatsApp en breve para hablar contigo. Si prefieres, reserva ya tu hueco.",
+    texto: "Hemos recibido tus respuestas y podemos ayudarte. Te escribimos por WhatsApp en breve. Si prefieres no esperar, reserva ahora tu llamada gratuita.",
     accion: { texto: "Reservar llamada gratuita", href: "/#agendar" },
   },
   tibio: {
-    titulo: "Gracias, ya tenemos tus respuestas",
-    texto: "Todavía no vemos claro el momento ideal, así que no te llamaremos sin más. En las próximas semanas te enviaremos por WhatsApp casos reales de negocios como el tuyo.",
+    titulo: "Hemos recibido tus respuestas",
+    texto: "Te escribimos por WhatsApp en breve con ideas concretas para tu negocio. Si prefieres no esperar, reserva ahora una llamada gratuita.",
+    accion: { texto: "Reservar llamada gratuita", href: "/#agendar" },
   },
   no_encaja: {
-    titulo: "Gracias por tu tiempo",
-    texto: "Ahora mismo un servicio a medida no sería lo más rentable para ti, y preferimos decírtelo claro. Mientras tanto, tienes contenido gratuito para empezar por tu cuenta.",
+    titulo: "Hemos recibido tus respuestas",
+    texto: "Gracias por contarnos tu caso. Te escribimos por WhatsApp con recursos para empezar. Mientras tanto, tienes contenido gratuito sobre automatización.",
     accion: { texto: "Ver contenido gratuito", href: "/blog" },
   },
 };
@@ -84,6 +85,7 @@ export default function Formulario() {
 
   const esUltimo = paso === TOTAL - 1;
   const pregunta = paso >= 1 && paso <= PREGUNTAS.length ? PREGUNTAS[paso - 1] : null;
+  const moneda = simboloMoneda(pais);
   const campoOtro = pregunta && (pregunta.campo === "rubro" || pregunta.campo === "automatizar") ? pregunta.campo : null;
   const pideOtro = !!(campoOtro && resp[campoOtro] === "otro");
 
@@ -201,7 +203,7 @@ export default function Formulario() {
                       return (
                         <button key={id} type="button" role="radio" aria-checked={sel} className="nl-opcion nl-opc" onClick={() => elegir(pregunta.campo, id)}
                           style={{ animationDelay: `${i * 45}ms`, textAlign: "left", cursor: "pointer", padding: "0.95rem 1.1rem", borderRadius: 14, fontFamily: font, fontSize: "0.95rem", border: `1.5px solid ${sel ? AZUL : LINEA}`, background: sel ? "#eff6ff" : "#fff", color: TINTA, fontWeight: sel ? 500 : 400, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, boxShadow: sel ? "0 0 0 4px rgba(37,99,235,.08)" : "none" }}>
-                          <span>{texto}</span>
+                          <span>{texto.replace(/\$/g, moneda)}</span>
                           <span style={{ width: 20, height: 20, borderRadius: "50%", flexShrink: 0, border: `1.5px solid ${sel ? AZUL : "#cbd5e1"}`, background: sel ? AZUL : "transparent", display: "flex", alignItems: "center", justifyContent: "center", animation: sel ? "nl-pop .3s ease both" : "none" }}>
                             {sel && <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>}
                           </span>
