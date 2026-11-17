@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { PREGUNTAS, type Campo, type Clasificacion } from "@/lib/diagnostico";
-import { PAISES, detectarPais, paisDelNavegador, prefijoDe } from "@/lib/paises";
+import { detectarPais, paisDelNavegador, prefijoDe } from "@/lib/paises";
+import SelectorPais from "./SelectorPais";
 
 const AZUL = "#2563eb";
 const TINTA = "#0f172a";
@@ -180,13 +181,8 @@ export default function Formulario() {
                     </div>
                     <div>
                       <label htmlFor="nl-tel" style={etiqueta}>WhatsApp</label>
-                      <div style={{ display: "flex", gap: 8 }}>
-                        <div style={{ position: "relative", flexShrink: 0 }}>
-                          <select aria-label="País" className="nl-campo" value={pais} onChange={(e) => setPais(e.target.value)} style={{ ...caja, width: "auto", paddingRight: "1.9rem", appearance: "none", cursor: "pointer", fontVariantNumeric: "tabular-nums" }}>
-                            {PAISES.map(([iso, nom, pre]) => <option key={iso} value={iso}>{iso} +{pre} · {nom}</option>)}
-                          </select>
-                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={GRIS} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }}><polyline points="6 9 12 15 18 9" /></svg>
-                        </div>
+                      <div style={{ display: "flex", gap: 8, alignItems: "stretch" }}>
+                        <SelectorPais valor={pais} onCambiar={setPais} />
                         <input id="nl-tel" name="tel" type="tel" inputMode="tel" className="nl-campo" style={caja} value={telefono} onChange={(e) => cambiarTelefono(e.target.value)} autoComplete="tel-national" placeholder="600 000 000" maxLength={24} />
                       </div>
                       <p style={{ color: "#94a3b8", fontFamily: font, fontSize: "0.74rem", margin: "0.5rem 0 0 0.15rem" }}>Si pegas el número con el prefijo (+52…), detectamos el país solos. Solo lo usamos para contestarte sobre esto.</p>
