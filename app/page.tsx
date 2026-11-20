@@ -753,7 +753,7 @@ export default function Home() {
             </g>
             <g style={{ animation:"badge-enter 0.6s cubic-bezier(0.22,1,0.36,1) 2.5s both" }}>
               <circle cx={499} cy={881} r={28} fill="none" stroke="rgba(37,99,235,0.25)" strokeWidth="1.2" style={{ transformOrigin:"499px 881px", animation:"badge-ripple 7s ease-out 2.7s infinite" }} />
-              <a href="https://wa.me/34638619588" target="_blank" rel="noopener noreferrer" style={{ cursor:"pointer" }}>
+              <a href="https://wa.me/34606806376" target="_blank" rel="noopener noreferrer" style={{ cursor:"pointer" }}>
                 <g style={{ transformOrigin:"499px 881px", animation:"badge-pulse 7s ease-in-out 2.7s infinite" }}>
                   <circle cx={499} cy={881} r={28} fill="white" stroke="rgba(0,0,0,0.07)" strokeWidth="1" style={{ filter:"drop-shadow(0 2px 8px rgba(0,0,0,0.11))" }} />
                   <image href="/icons/WhatsApp_Logo_green.svg.png" x={485} y={867} width={28} height={28} preserveAspectRatio="xMidYMid meet" />
@@ -856,7 +856,7 @@ export default function Home() {
               Agendar una cita
             </a>
             <a
-              href="https://wa.me/34638619588"
+              href="https://wa.me/34606806376"
               target="_blank" rel="noopener noreferrer"
               style={{ display: "inline-flex", alignItems: "center", gap: "0.6rem", background: "rgba(255,255,255,0.92)", color: "#0f0f0f", fontWeight: 600, fontSize: "0.88rem", padding: "0.82rem 1.5rem", borderRadius: "999px", border: "1px solid rgba(255,255,255,0.6)", textDecoration: "none", letterSpacing: "-0.01em", fontFamily: "var(--font-poppins)", boxShadow: "0 2px 12px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.9)", backdropFilter: "blur(12px)", transition: "transform 0.15s, box-shadow 0.15s" }}
               onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)"; (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 18px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.9)"; }}
@@ -867,7 +867,7 @@ export default function Home() {
                 <span style={{ position:"absolute", width:14, height:14, borderRadius:"50%", background:"rgba(34,197,94,0.25)", animation:"ping 1.5s cubic-bezier(0,0,0.2,1) infinite" }} />
                 <span style={{ width:8, height:8, borderRadius:"50%", background:"#22c55e", display:"inline-block" }} />
               </span>
-              +34 638 61 95 88
+              +34 606 806 376
             </a>
             <a
               href="tel:+34910054012"
@@ -1349,9 +1349,9 @@ export default function Home() {
               <a href="mailto:soporte@automatizacionesn8n.com" style={{ display:"block", fontSize:"0.81rem", color:"rgba(255,255,255,0.5)", textDecoration:"none", marginBottom:"0.55rem", fontFamily:"var(--font-poppins)", transition:"color 0.15s" }}
                 onMouseEnter={e => (e.currentTarget.style.color="#fff")}
                 onMouseLeave={e => (e.currentTarget.style.color="rgba(255,255,255,0.5)")}>soporte@automatizacionesn8n.com</a>
-              <a href="tel:+34638619588" style={{ display:"block", fontSize:"0.81rem", color:"rgba(255,255,255,0.5)", textDecoration:"none", marginBottom:"0.55rem", fontFamily:"var(--font-poppins)", transition:"color 0.15s" }}
+              <a href="tel:+34606806376" style={{ display:"block", fontSize:"0.81rem", color:"rgba(255,255,255,0.5)", textDecoration:"none", marginBottom:"0.55rem", fontFamily:"var(--font-poppins)", transition:"color 0.15s" }}
                 onMouseEnter={e => (e.currentTarget.style.color="#fff")}
-                onMouseLeave={e => (e.currentTarget.style.color="rgba(255,255,255,0.5)")}>+34 638 61 95 88</a>
+                onMouseLeave={e => (e.currentTarget.style.color="rgba(255,255,255,0.5)")}>+34 606 806 376</a>
               <div style={{ fontSize:"0.78rem", color:"rgba(255,255,255,0.35)", lineHeight:1.6, marginBottom:"0.3rem", fontFamily:"var(--font-poppins)" }}>
                 Calle Blasco de Garay 63, Local 2<br/>Chamberí · 28015 Madrid
               </div>
@@ -1422,7 +1422,7 @@ export default function Home() {
 
       {/* WhatsApp FAB */}
       <a
-        href="https://wa.me/34638619588"
+        href="https://wa.me/34606806376"
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Contactar por WhatsApp"
